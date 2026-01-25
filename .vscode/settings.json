@@ -2,5 +2,22 @@
     "workbench.editorAssociations": {
         "*.copilotmd": "vscode.markdown.preview.editor",
         "file:/**/*.csv": "jupyter-data-wrangler"
-    }
+    },
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "database": "south_tyrol_hazards",
+            "name": "south tyrol hazards",
+            "username": "root",
+            "password": "1234"
+        }
+    ]
 }
