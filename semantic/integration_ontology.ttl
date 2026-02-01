@@ -2,9 +2,376 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix geo: <http://www.opengis.net/ont/geosparql#> .
 
+#################################################################
+#    Ontology declaration
+#################################################################
 
-# Ontology declaration
 : a owl:Ontology ;
-    rdfs:label "South Tyrol Avalanche and Landslides Hazard Management Ontology" .
+    rdfs:label "South Tyrol Avalanche and Landslides Hazard Management Ontology"@en ;
+    rdfs:comment "An ontology for managing hazard zones, road segments, and municipalities in South Tyrol"@en .
 
+#################################################################
+#    Classes
+#################################################################
+
+:SpatialEntity a owl:Class ;
+    rdfs:label "Spatial Entity"@en ;
+    rdfs:comment "A general spatial feature or area, including both administrative units and hazard zones."@en .
+
+:GeographicUnit a owl:Class ;
+    rdfs:subClassOf :SpatialEntity ;
+    rdfs:label "Geographic unit"@en ;
+    rdfs:comment "An administrative, geographical or territorial entity that spans a certain area. For example, a municipality, a country, a district, etc."@en .
+
+:Municipality a owl:Class ;
+    rdfs:subClassOf :GeographicUnit ;
+    rdfs:label "Municipality"@en ;
+    rdfs:comment "An administrative territorial entity in South Tyrol"@en .
+
+:ProvincialDistrict a owl:Class ;
+    rdfs:subClassOf :GeographicUnit ;
+    rdfs:label "Provincial District"@en ;
+    rdfs:comment "Administrative district containing multiple municipalities"@en .
+
+:HealthDistrict a owl:Class ;
+    rdfs:subClassOf :GeographicUnit ;
+    rdfs:label "Health District"@en ;
+    rdfs:comment "Smaller healthcare administrative region in the province of South Tyrol"@en .
+
+:HealthRegion a owl:Class ;
+    rdfs:subClassOf :GeographicUnit ;
+    rdfs:label "Health Region"@en ;
+    rdfs:comment "Larger Healthcare administrative region in the province of South Tyrol"@en .
+
+:HazardZone a owl:Class ;
+    rdfs:subClassOf :SpatialEntity ;
+    rdfs:label "Hazard zone"@en ;
+    rdfs:comment "A spatial area subject to a specific hazard."@en .
+
+:AvalancheZone a owl:Class ;
+    rdfs:subClassOf :HazardZone ;
+    rdfs:label "Avalanche zone"@en .
+
+:LandslideZone a owl:Class ;
+    rdfs:subClassOf :HazardZone ;
+    rdfs:label "Landslide zone"@en .
+
+:RoadSegment a owl:Class ;
+    rdfs:label "Road segment"@en .
+
+:Bridge a owl:Class ;
+    rdfs:subClassOf :RoadSegment ;
+    rdfs:label "Bridge"@en .
+
+:Tunnel a owl:Class ;
+    rdfs:subClassOf :RoadSegment ;
+    rdfs:label "Tunnel"@en .
+
+:RouteReference a owl:Class ;
+    rdfs:label "Route Reference"@en .
+
+:RoadSegmentConnectionPoint a owl:Class ;
+    rdfs:label "Road Segment Connection Point"@en .
+
+:HazardProcess a owl:Class ;
+    owl:oneOf (
+        :Landslide
+        :Collapse
+        :Sliding
+        :Subsidence
+        :SlopeFlow
+        :Avalanche
+        :SnowSlabAvalanche
+        :PowderSnowAvalanche
+        :SurfaceAvalanche
+        :UnknownProcess
+    ) ;
+    rdfs:label "Process"@en ;
+    rdfs:comment "A typification of a hazard process."@en .
+
+:StudyLevel a owl:Class ;
+    owl:oneOf (
+        :HighStudyLevel
+        :MediumStudyLevel
+        :LowStudyLevel
+        :UnknownStudyLevel
+    ) ;
+    rdfs:label "Study Level"@en ;
+    rdfs:comment "The level of study or investigation for a hazard zone."@en .
+
+:DangerLevel a owl:Class ;
+    rdfs:label "Danger Level"@en ;
+    rdfs:comment "The level of danger associated with a hazard zone."@en .
+
+:AvalancheDangerLevel a owl:Class ;
+    owl:oneOf (
+        :VeryHighAvalancheDanger
+        :HighAvalancheDanger
+        :MediumAvalancheDanger
+        :ExaminedNotInDangerAvalanche
+    ) ;
+    rdfs:subClassOf :DangerLevel ;
+    rdfs:label "Avalanche Danger Level"@en .
+
+:LandslideDangerLevel a owl:Class ;
+    owl:oneOf (
+        :VeryHighLandslideDanger
+        :HighLandslideDanger
+        :MediumLandslideDanger
+        :ExaminedNotInDangerLandslide
+    ) ;
+    rdfs:subClassOf :DangerLevel ;
+    rdfs:label "Landslide Danger Level"@en .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+:isPartOfGeographicUnit a owl:ObjectProperty ;
+    rdfs:label "is part of geographic unit"@en ;
+    rdfs:domain :GeographicUnit ;
+    rdfs:range :GeographicUnit .
+
+:hasGeometry a owl:ObjectProperty,
+               owl:FunctionalProperty ;
+    rdfs:domain :SpatialEntity ;
+    rdfs:range geo:Geometry ;
+    rdfs:label "has geometry"@en .
+
+:isLocatedInMunicipality a owl:ObjectProperty ;
+    rdfs:domain :SpatialEntity ;
+    rdfs:range :Municipality ;
+    rdfs:label "is located in municipality"@en ;
+    owl:inverseOf :hasSpatialEntity .
+
+:hasSpatialEntity a owl:ObjectProperty ;
+    rdfs:domain :Municipality ;
+    rdfs:range :SpatialEntity ;
+    rdfs:label "has spatial entity"@en ;
+    owl:inverseOf :isLocatedInMunicipality .
+
+:hasHazardProcess a owl:ObjectProperty ,
+               owl:FunctionalProperty ;
+    rdfs:domain :HazardZone ;
+    rdfs:range :HazardProcess ;
+    rdfs:label "has process"@en .
+
+:hasStudyLevel a owl:ObjectProperty ,
+               owl:FunctionalProperty ;
+    rdfs:domain :HazardZone ;
+    rdfs:range :StudyLevel ;
+    rdfs:label "has study level"@en .
+
+:hasDangerLevel a owl:ObjectProperty ,
+               owl:FunctionalProperty ;
+    rdfs:domain :HazardZone ;
+    rdfs:range :DangerLevel ;
+    rdfs:label "has danger level"@en .
+
+:belongsToRef a owl:ObjectProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range :RouteReference ;
+    rdfs:label "belongs to route reference"@en .
+
+:comesFromPoint a owl:ObjectProperty ,
+               owl:FunctionalProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range :RoadSegmentConnectionPoint ;
+    rdfs:label "comes from point"@en .
+
+:goesToPoint a owl:ObjectProperty ,
+               owl:FunctionalProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range :RoadSegmentConnectionPoint ;
+    rdfs:label "goes to point"@en .
+
+:intersectsHazardZone a owl:ObjectProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range :HazardZone ;
+    rdfs:label "intersects hazard zone"@en ;
+    owl:inverseOf :isIntersectedByRoadSegment .
+
+:isIntersectedByRoadSegment a owl:ObjectProperty ;
+    rdfs:domain :HazardZone ;
+    rdfs:range :RoadSegment ;
+    rdfs:label "is intersected by road segment"@en ;
+    owl:inverseOf :intersectsHazardZone .
+
+#################################################################
+#    Data Properties
+#################################################################
+
+:name a owl:DatatypeProperty ;
+    rdfs:domain :SpatialEntity ;
+    rdfs:range xsd:string ;
+    rdfs:label "name"@en ;
+    rdfs:comment "Name of the entity in different languages"@en .
+
+:hasIdentifier a owl:DatatypeProperty ;
+    rdfs:domain :SpatialEntity ;
+    rdfs:range xsd:string ;
+    rdfs:label "has an identifier"@en .
+
+:hasIstatCode a owl:DatatypeProperty ,
+                owl:InverseFunctionalProperty ,
+                owl:FunctionalProperty ;
+    rdfs:subPropertyOf :hasIdentifier ;
+    rdfs:domain :Municipality ;
+    rdfs:range xsd:int ;
+    rdfs:label "ISTAT code"@en .
+
+:hasBelfioreCode a owl:DatatypeProperty ,
+                    owl:InverseFunctionalProperty ,
+                    owl:FunctionalProperty ;
+    rdfs:subPropertyOf :hasIdentifier ;
+    rdfs:domain :Municipality ;
+    rdfs:range xsd:string ;
+    rdfs:label "Belfiore code"@en .
+
+:hasZipCode a owl:DatatypeProperty ,
+              owl:InverseFunctionalProperty ;
+    rdfs:subPropertyOf :hasIdentifier ;
+    rdfs:domain :Municipality ;
+    rdfs:range xsd:int ;
+    rdfs:label "ZIP code"@en .
+
+:hasOsmId a owl:DatatypeProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range xsd:string ;
+    rdfs:label "OSM id"@en .
+
+:hasArea a owl:DatatypeProperty ,
+            owl:FunctionalProperty ;
+    rdfs:domain :SpatialEntity ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "area in square meters"@en .
+
+# GeoSPARQL geometry
+geo:asWKT a owl:DatatypeProperty ,
+            owl:FunctionalProperty ;
+    rdfs:domain geo:Geometry ;
+    rdfs:range geo:wktLiteral ;
+    rdfs:label "as WKT"@en .
+
+#################################################################
+#    Individuals (Instances)
+#################################################################
+
+# Process types
+:Landslide a :HazardProcess ;
+    rdfs:label "Landslide"@en,
+               "Frana"@it,
+               "Massenbewegung"@de .
+
+:Collapse a :HazardProcess ;
+    rdfs:label "Collapse"@en,
+               "Crollo"@it,
+               "Sturz"@de .
+
+:Sliding a :HazardProcess ;
+    rdfs:label "Sliding"@en,
+               "Scivolamento"@it,
+               "Rutschung"@de .
+
+:Subsidence a :HazardProcess ;
+    rdfs:label "Subsidence"@en,
+               "Sprofondamento"@it,
+               "Einbruch"@de .
+
+:SlopeFlow a :HazardProcess ;
+    rdfs:label "Slope Flow"@en,
+               "Colata di versante"@it,
+               "Hangmure"@de .
+
+:Avalanche a :HazardProcess ;
+    rdfs:label "Avalanche"@en,
+               "Valanga"@it,
+               "Lawine"@de .
+
+:SnowSlabAvalanche a :HazardProcess ;
+    rdfs:label "Snow Slab Avalanche"@en,
+               "Slittamento di neve"@it,
+               "Gleitschnee"@de .
+
+:PowderSnowAvalanche a :HazardProcess ;
+    rdfs:label "Powder Snow Avalanche"@en,
+               "Valanga nubiforme"@it,
+               "Staublawine"@de .
+
+:SurfaceAvalanche a :HazardProcess ;
+    rdfs:label "Surface Avalanche"@en,
+               "Valanga radente"@it,
+               "Fließlawine"@de .
+
+:UnknownProcess a :HazardProcess ;
+    rdfs:label "Unknown process"@en,
+               "Processo sconosciuto"@it,
+               "Unbekannter Prozess"@de .
+
+
+# Study levels
+:HighStudyLevel a :StudyLevel ;
+    rdfs:label "High study level"@en,
+               "Hoher Studienstand"@de,
+               "Alto livello di studio"@it .
+
+:MediumStudyLevel a :StudyLevel ;
+    rdfs:label "Medium study level"@en,
+               "Mittlerer Studienstand"@de,
+               "Livello di studio medio"@it .
+
+:LowStudyLevel a :StudyLevel ;
+    rdfs:label "Low study level"@en,
+               "Niedriger Studienstand"@de,
+               "Basso livello di studio"@it .
+
+:UnknownStudyLevel a :StudyLevel ;
+    rdfs:label "Unknown study level"@en,
+               "Unbekannter Studienstand"@de,
+               "Livello di studio sconosciuto"@it .
+
+
+# Avalanche danger levels
+:VeryHighAvalancheDanger a :AvalancheDangerLevel ;
+    rdfs:label "Very high avalanche danger"@en,
+               "Sehr hohe Lawinengefahr"@de,
+               "Pericolo di valanghe molto elevato"@it .
+
+:HighAvalancheDanger a :AvalancheDangerLevel ;
+    rdfs:label "High avalanche danger"@en,
+               "Hohe Lawinengefahr"@de,
+               "Pericolo di valanghe elevato"@it .
+
+:MediumAvalancheDanger a :AvalancheDangerLevel ;
+    rdfs:label "Medium avalanche danger"@en,
+               "Mittlere Lawinengefahr"@de,
+               "Pericolo di valanghe medio"@it .
+
+:ExaminedNotInDangerAvalanche a :AvalancheDangerLevel ;
+    rdfs:label "Examined and not in danger of avalanches"@en,
+               "Untersucht und keine Lawinengefahr"@de,
+               "Esaminato e non soggetto a pericolo di valanghe"@it .
+
+
+# Landslide danger levels
+:VeryHighLandslideDanger a :LandslideDangerLevel ;
+    rdfs:label "Very high landslide danger"@en,
+               "Sehr hohe Rutschungsgefahr"@de,
+               "Pericolo di frane molto elevato"@it .
+
+:HighLandslideDanger a :LandslideDangerLevel ;
+    rdfs:label "High landslide danger"@en,
+               "Hohe Rutschungsgefahr"@de,
+               "Pericolo di frane elevato"@it .
+
+:MediumLandslideDanger a :LandslideDangerLevel ;
+    rdfs:label "Medium landslide danger"@en,
+               "Mittlere Rutschungsgefahr"@de,
+               "Pericolo di frane medio"@it .
+
+:ExaminedNotInDangerLandslide a :LandslideDangerLevel ;
+    rdfs:label "Examined and not in danger of landslides"@en,
+               "Untersucht und keine Rutschungsgefahr"@de,
+               "Esaminato e non soggetto a pericolo di frane"@it .
