@@ -1,0 +1,4 @@
+.\ontop endpoint `
+    --ontology=hazards_ontology.ttl `
+    --mapping=hazards_mapping.obda `
+    --properties=hazards.properties

@@ -213,26 +213,21 @@
     rdfs:label "has an identifier"@en .
 
 :hasIstatCode a owl:DatatypeProperty ,
-                owl:InverseFunctionalProperty ,
                 owl:FunctionalProperty ;
     rdfs:subPropertyOf :hasIdentifier ;
     rdfs:domain :Municipality ;
-    rdfs:range xsd:int ;
     rdfs:label "ISTAT code"@en .
 
 :hasBelfioreCode a owl:DatatypeProperty ,
-                    owl:InverseFunctionalProperty ,
                     owl:FunctionalProperty ;
     rdfs:subPropertyOf :hasIdentifier ;
     rdfs:domain :Municipality ;
-    rdfs:range xsd:string ;
     rdfs:label "Belfiore code"@en .
 
 :hasZipCode a owl:DatatypeProperty ,
               owl:FunctionalProperty ;
     rdfs:subPropertyOf :hasIdentifier ;
     rdfs:domain :Municipality ;
-    rdfs:range xsd:int ;
     rdfs:label "ZIP code"@en .
 
 :hasOsmId a owl:DatatypeProperty ;
@@ -247,11 +242,7 @@
     rdfs:label "area in square meters"@en .
 
 # GeoSPARQL geometry
-geo:asWKT a owl:DatatypeProperty ,
-            owl:FunctionalProperty ;
-    rdfs:domain geo:Geometry ;
-    rdfs:range geo:wktLiteral ;
-    rdfs:label "as WKT"@en .
+geo:asWKT rdfs:label "as WKT"@en .
 
 #################################################################
 #    Individuals (Instances)
