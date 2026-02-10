@@ -9,6 +9,10 @@ mappingId	Municipality
 target		:Municipality/{ISTAT_CODE} a :Municipality ; :hasIstatCode "{ISTAT_CODE}"^^xsd:string ; :hasBelfioreCode "{BELFIORE_CODE}"^^xsd:string ; :hasZipCode "{ZIP_CODE}"^^xsd:string ; rdfs:label "{MAP_LABEL}"@it ; rdfs:label "{MAP_LABEL}"@de ; :name "{NAME_IT}"@it ; :name "{NAME_DE}"@de ; :hasArea {AREA}^^xsd:decimal ; :isPartOfGeographicUnit :ProvincialDistrict/{DISTR_CODE} ; :isPartOfGeographicUnit :HealthDistrict/{HEALTH_DISTRICT} ; :hasGeometry :Geometry/Municipality/{ISTAT_CODE} .
 source		SELECT ISTAT_CODE, BELFIORE_CODE, ZIP_CODE, NAME_IT, NAME_DE, NAME_LD, MAP_LABEL, AREA, DISTR_CODE, HEALTH_DISTRICT FROM municipalities
 
+mappingId	MunicipalityShapes
+target		:Geometry/Municipality/{ISTAT_CODE} a geo:Geometry ; geo:asWKT "{SHAPE}"^^geo:wktLiteral .
+source		SELECT ISTAT_CODE, ST_AsText(SHAPE) AS SHAPE FROM municipalities
+
 mappingId	Municipality_Ladin
 target		:Municipality/{ISTAT_CODE} :name "{NAME_LD}"@ld .
 source		SELECT ISTAT_CODE, NAME_LD FROM municipalities WHERE NAME_LD_IS NOT NULL AND NAME_LD <> ''

@@ -4,6 +4,7 @@
 # Academic Year: 2025-2026
 
 import streamlit as st
+import shapely
 import pandas as pd
 from PIL import Image
 from SPARQLWrapper import SPARQLWrapper, JSON
@@ -118,7 +119,7 @@ GROUP BY ?municipality ?name_it
 ORDER BY DESC(?vulnerableKmPct)
 LIMIT 10
 """,
-        "Municipalities most endangered by avalanches": """
+        "Municipalities most endangered by Avalanches": """
 PREFIX : <http://hazard-ontology.org/>
 SELECT ?municipality ?name_it
        ((ROUND((SUM(DISTINCT ?totalRoadKm) / 1000) * 10) / 10) AS ?totalRoadKmAll)
@@ -171,12 +172,122 @@ ORDER BY DESC(?landslidehazardKmPct)
     }
     
 
+    # --- MAP QUERIES ---
+    map_queries = {
+        "Avalanche": """
+PREFIX : <http://hazard-ontology.org/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+SELECT ?municipality
+		?hazardPct
+		?name_it
+		?shape
+WHERE{
+{
+SELECT ?municipality
+((ROUND(((SUM(DISTINCT ?avalancheKm) /SUM(DISTINCT ?totalRoadKm)) * 100) * 10) / 10) AS ?hazardPct)
+
+WHERE {
+  ?municipality a :Municipality .
+  ?road a :RoadSegment ;
+        :isLocatedInMunicipality ?municipality ;
+        :hasLength ?totalRoadKm .
+  OPTIONAL {
+    ?road :intersectsHazardZone ?zone ;
+          :hasLength ?avalancheKm .
+    ?zone a :AvalancheZone ;
+          :hasDangerLevel ?dangerLevel .
+    FILTER(?dangerLevel NOT IN (
+      <http://hazard-ontology.org/DangerLevel/1040301>
+    ))
+  }
+}
+GROUP BY ?municipality
+ORDER BY DESC(?hazardPct)
+}
+  ?municipality :name ?name_it . FILTER(LANG(?name_it) = "it")
+  ?municipality :hasGeometry ?geom .
+  ?geom geo:asWKT ?shape .
+}
+    """,
+    "Landslide": """
+PREFIX : <http://hazard-ontology.org/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+SELECT ?municipality
+		?hazardPct
+		?name_it
+		?shape
+WHERE{
+{
+SELECT ?municipality
+((ROUND(((SUM(DISTINCT ?landslideKm) /SUM(DISTINCT ?totalRoadKm)) * 100) * 10) / 10) AS ?hazardPct)
+
+WHERE {
+  ?municipality a :Municipality .
+  ?road a :RoadSegment ;
+        :isLocatedInMunicipality ?municipality ;
+        :hasLength ?totalRoadKm .
+  OPTIONAL {
+    ?road :intersectsHazardZone ?zone ;
+          :hasLength ?landslideKm .
+    ?zone a :LandslideZone ;
+          :hasDangerLevel ?dangerLevel .
+    FILTER(?dangerLevel NOT IN (
+      <http://hazard-ontology.org/DangerLevel/1040101>
+    ))
+  }
+}
+GROUP BY ?municipality
+ORDER BY DESC(?hazardPct)
+}
+  ?municipality :name ?name_it . FILTER(LANG(?name_it) = "it")
+  ?municipality :hasGeometry ?geom .
+  ?geom geo:asWKT ?shape .
+}
+    """,
+    "Either": """
+PREFIX : <http://hazard-ontology.org/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+SELECT ?municipality
+		?hazardPct
+		?name_it
+		?shape
+WHERE{
+{
+SELECT ?municipality
+((ROUND(((SUM(DISTINCT ?hazardKm) /SUM(DISTINCT ?totalRoadKm)) * 100) * 10) / 10) AS ?hazardPct)
+
+WHERE {
+  ?municipality a :Municipality .
+  ?road a :RoadSegment ;
+        :isLocatedInMunicipality ?municipality ;
+        :hasLength ?totalRoadKm .
+  OPTIONAL {
+    ?road :intersectsHazardZone ?zone ;
+          :hasLength ?hazardKm .
+    ?zone a :HazardZone ;
+          :hasDangerLevel ?dangerLevel .
+    FILTER(?dangerLevel NOT IN (
+      <http://hazard-ontology.org/DangerLevel/1040101>,
+      <http://hazard-ontology.org/DangerLevel/1040301>
+    ))
+  }
+}
+GROUP BY ?municipality
+ORDER BY DESC(?hazardPct)
+}
+  ?municipality :name ?name_it . FILTER(LANG(?name_it) = "it")
+  ?municipality :hasGeometry ?geom .
+  ?geom geo:asWKT ?shape .
+}
+    """
+}
+
     # --- SECTION: MAP ---
     st.markdown("---")
-    st.subheader("South Tyrol Hazard Map")
+    st.header("South Tyrol Hazard Map")
     hazard_type = st.selectbox("Select hazard type:", ["Avalanche", "Landslide", "Either"])
     if st.button("Show Hazard Map"):
-        sparql.setQuery(queries[hazard_type])
+        sparql.setQuery(map_queries[hazard_type])
         sparql.setReturnFormat(JSON)
         try:
             results = sparql.query().convert()
@@ -187,41 +298,44 @@ ORDER BY DESC(?landslidehazardKmPct)
             df["name_it"] = df["name_it"].fillna("Unknown")
 
             import geopandas as gpd
-            import os
-            shape_path = current_dir.parent / "Data" / "Municipalities.csv"
-            if os.path.exists(shape_path):
-                muni_shapes = pd.read_csv(shape_path)
-                if "SHAPE" in muni_shapes.columns:
-                    muni_shapes["geometry"] = muni_shapes["SHAPE"].apply(lambda wkt: gpd.GeoSeries.from_wkt([wkt])[0] if pd.notna(wkt) else None)
-                    gdf = gpd.GeoDataFrame(muni_shapes, geometry="geometry", crs="EPSG:32632")
-                    gdf = gdf.merge(df, left_on="NAME_IT", right_on="name_it", how="left")
-                    gdf = gdf.to_crs("EPSG:4326")
-                    gdf = gdf[gdf["geometry"].notnull()]
+            import pydeck as pdk
+            from shapely.ops import transform
+            import pyproj
+            # Define transformer from UTM 32N to WGS84
+            project = pyproj.Transformer.from_crs("epsg:32632", "epsg:4326", always_xy=True).transform
+            # Parse WKT shapes from SPARQL results
+            def parse_geometry(wkt):
+              try:
+                  geom = shapely.wkt.loads(wkt)
+                  geom_wgs84 = transform(project, geom)
+                  if geom_wgs84.geom_type == "Polygon":
+                      return [list(geom_wgs84.exterior.coords)]
+                  elif geom_wgs84.geom_type == "MultiPolygon":
+                      return [list(poly.exterior.coords) for poly in geom_wgs84.geoms]
+                  else:
+                      return []
+              except Exception:
+                  return []
 
-                    import pydeck as pdk
-                    gdf["polygon"] = gdf["geometry"].apply(lambda geom: [list(geom.exterior.coords)] if geom is not None and geom.geom_type == "Polygon" else [])
-                    gdf["color"] = gdf["hazardPct"].apply(lambda pct: [255, int(255 - pct * 2.5), int(255 - pct * 2.5), 120] if pd.notna(pct) else [200,200,200,80])
+            df["polygon"] = df["shape"].apply(parse_geometry)
+            df["color"] = df["hazardPct"].apply(lambda pct: [255, int(255 - pct * 2.5), int(255 - pct * 2.5), 120] if pd.notna(pct) else [200,200,200,80])
 
-                    layer = pdk.Layer(
-                        "PolygonLayer",
-                        data=gdf,
-                        get_polygon="polygon",
-                        get_fill_color="color",
-                        pickable=True,
-                        auto_highlight=True,
-                        opacity=0.6
-                    )
-                    view_state = pdk.ViewState(
-                        latitude=46.6,
-                        longitude=11.3,
-                        zoom=8,
-                        pitch=0
-                    )
-                    st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{NAME_IT}: {hazardPct}%" }))
-                else:
-                    st.warning("Municipalities.csv does not contain SHAPE column.")
-            else:
-                st.warning("Municipalities.csv not found.")
+            layer = pdk.Layer(
+                "PolygonLayer",
+                data=df,
+                get_polygon="polygon",
+                get_fill_color="color",
+                pickable=True,
+                auto_highlight=True,
+                opacity=0.6
+            )
+            view_state = pdk.ViewState(
+                latitude=46.6,
+                longitude=11.3,
+                zoom=8,
+                pitch=0
+            )
+            st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name_it}: {hazardPct}%" }))
         except Exception as e:
             st.error(f"Map rendering failed: {e}")
             
