@@ -77,26 +77,24 @@
 
 :HazardProcess a owl:Class ;
     owl:oneOf (
-        :Landslide
-        :Collapse
-        :Sliding
-        :Subsidence
-        :SlopeFlow
-        :Avalanche
-        :SnowSlabAvalanche
-        :PowderSnowAvalanche
-        :SurfaceAvalanche
-        :UnknownProcess
+        <http://hazard-ontology.org/Landslide>
+        <http://hazard-ontology.org/Collapse>
+        <http://hazard-ontology.org/Sliding>
+        <http://hazard-ontology.org/Subsidence>
+        <http://hazard-ontology.org/SlopeFlow>
+        <http://hazard-ontology.org/Avalanche>
+        <http://hazard-ontology.org/SnowSlabAvalanche>
+        <http://hazard-ontology.org/PowderSnowAvalanche>
+        <http://hazard-ontology.org/SurfaceAvalanche>
     ) ;
     rdfs:label "Process"@en ;
     rdfs:comment "A typification of a hazard process."@en .
 
 :StudyLevel a owl:Class ;
     owl:oneOf (
-        :HighStudyLevel
-        :MediumStudyLevel
-        :LowStudyLevel
-        :UnknownStudyLevel
+        <http://hazard-ontology.org/HighStudyLevel>
+        <http://hazard-ontology.org/MediumStudyLevel>
+        <http://hazard-ontology.org/LowStudyLevel>
     ) ;
     rdfs:label "Study Level"@en ;
     rdfs:comment "The level of study or investigation for a hazard zone."@en .
@@ -107,20 +105,20 @@
 
 :AvalancheDangerLevel a owl:Class ;
     owl:oneOf (
-        :VeryHighAvalancheDanger
-        :HighAvalancheDanger
-        :MediumAvalancheDanger
-        :ExaminedNotInDangerAvalanche
+        <http://hazard-ontology.org/VeryHighAvalancheDanger>
+        <http://hazard-ontology.org/HighAvalancheDanger>
+        <http://hazard-ontology.org/MediumAvalancheDanger>
+        <http://hazard-ontology.org/ExaminedNotInDangerAvalanche>
     ) ;
     rdfs:subClassOf :DangerLevel ;
     rdfs:label "Avalanche Danger Level"@en .
 
 :LandslideDangerLevel a owl:Class ;
     owl:oneOf (
-        :VeryHighLandslideDanger
-        :HighLandslideDanger
-        :MediumLandslideDanger
-        :ExaminedNotInDangerLandslide
+        <http://hazard-ontology.org/VeryHighLandslideDanger>
+        <http://hazard-ontology.org/HighLandslideDanger>
+        <http://hazard-ontology.org/MediumLandslideDanger>
+        <http://hazard-ontology.org/ExaminedNotInDangerLandslide>
     ) ;
     rdfs:subClassOf :DangerLevel ;
     rdfs:label "Landslide Danger Level"@en .
@@ -231,7 +229,7 @@
     rdfs:label "Belfiore code"@en .
 
 :hasZipCode a owl:DatatypeProperty ,
-              owl:InverseFunctionalProperty ;
+              owl:FunctionalProperty ;
     rdfs:subPropertyOf :hasIdentifier ;
     rdfs:domain :Municipality ;
     rdfs:range xsd:int ;
@@ -260,118 +258,128 @@ geo:asWKT a owl:DatatypeProperty ,
 #################################################################
 
 # Process types
-:Landslide a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/Landslide> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/LX> ;
     rdfs:label "Landslide"@en,
                "Frana"@it,
                "Massenbewegung"@de .
 
-:Collapse a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/Collapse> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/LF> ;
     rdfs:label "Collapse"@en,
                "Crollo"@it,
                "Sturz"@de .
 
-:Sliding a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/Sliding> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/LG> ;
     rdfs:label "Sliding"@en,
                "Scivolamento"@it,
                "Rutschung"@de .
 
-:Subsidence a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/Subsidence> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/LC> ;
     rdfs:label "Subsidence"@en,
                "Sprofondamento"@it,
                "Einbruch"@de .
 
-:SlopeFlow a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/SlopeFlow> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/LD> ;
     rdfs:label "Slope Flow"@en,
                "Colata di versante"@it,
                "Hangmure"@de .
 
-:Avalanche a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/Avalanche> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/AX> ;
     rdfs:label "Avalanche"@en,
                "Valanga"@it,
                "Lawine"@de .
 
-:SnowSlabAvalanche a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/SnowSlabAvalanche> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/GS> ;
     rdfs:label "Snow Slab Avalanche"@en,
                "Slittamento di neve"@it,
                "Gleitschnee"@de .
 
-:PowderSnowAvalanche a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/PowderSnowAvalanche> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/AP> ;
     rdfs:label "Powder Snow Avalanche"@en,
                "Valanga nubiforme"@it,
                "Staublawine"@de .
 
-:SurfaceAvalanche a :HazardProcess ;
+<http://hazard-ontology.org/HazardProcess/SurfaceAvalanche> a :HazardProcess ;
+    owl:sameAs <http://hazard-ontology.org/HazardProcess/AD> ;
     rdfs:label "Surface Avalanche"@en,
                "Valanga radente"@it,
                "Fließlawine"@de .
 
-:UnknownProcess a :HazardProcess ;
-    rdfs:label "Unknown process"@en,
-               "Processo sconosciuto"@it,
-               "Unbekannter Prozess"@de .
-
 
 # Study levels
-:HighStudyLevel a :StudyLevel ;
+<http://hazard-ontology.org/StudyLevel/HighStudyLevel> a :StudyLevel ;
+    owl:sameAs <http://hazard-ontology.org/StudyLevel/A> ;
     rdfs:label "High study level"@en,
                "Hoher Studienstand"@de,
                "Alto livello di studio"@it .
 
-:MediumStudyLevel a :StudyLevel ;
+<http://hazard-ontology.org/StudyLevel/MediumStudyLevel> a :StudyLevel ;
+    owl:sameAs <http://hazard-ontology.org/StudyLevel/B> ;
     rdfs:label "Medium study level"@en,
                "Mittlerer Studienstand"@de,
                "Livello di studio medio"@it .
 
-:LowStudyLevel a :StudyLevel ;
+<http://hazard-ontology.org/StudyLevel/LowStudyLevel> a :StudyLevel ;
+    owl:sameAs <http://hazard-ontology.org/StudyLevel/C> ;
     rdfs:label "Low study level"@en,
                "Niedriger Studienstand"@de,
                "Basso livello di studio"@it .
 
-:UnknownStudyLevel a :StudyLevel ;
-    rdfs:label "Unknown study level"@en,
-               "Unbekannter Studienstand"@de,
-               "Livello di studio sconosciuto"@it .
-
 
 # Avalanche danger levels
-:VeryHighAvalancheDanger a :AvalancheDangerLevel ;
+<http://hazard-ontology.org/AvalancheDangerLevel/VeryHighAvalancheDanger> a :AvalancheDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040304> ;
     rdfs:label "Very high avalanche danger"@en,
                "Sehr hohe Lawinengefahr"@de,
                "Pericolo di valanghe molto elevato"@it .
 
-:HighAvalancheDanger a :AvalancheDangerLevel ;
+<http://hazard-ontology.org/AvalancheDangerLevel/HighAvalancheDanger> a :AvalancheDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040303> ;
     rdfs:label "High avalanche danger"@en,
                "Hohe Lawinengefahr"@de,
                "Pericolo di valanghe elevato"@it .
 
-:MediumAvalancheDanger a :AvalancheDangerLevel ;
+<http://hazard-ontology.org/AvalancheDangerLevel/MediumAvalancheDanger> a :AvalancheDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040302> ;
     rdfs:label "Medium avalanche danger"@en,
                "Mittlere Lawinengefahr"@de,
                "Pericolo di valanghe medio"@it .
 
-:ExaminedNotInDangerAvalanche a :AvalancheDangerLevel ;
+<http://hazard-ontology.org/AvalancheDangerLevel/ExaminedNotInDangerAvalanche> a :AvalancheDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040301> ;
     rdfs:label "Examined and not in danger of avalanches"@en,
                "Untersucht und keine Lawinengefahr"@de,
                "Esaminato e non soggetto a pericolo di valanghe"@it .
 
 
 # Landslide danger levels
-:VeryHighLandslideDanger a :LandslideDangerLevel ;
+<http://hazard-ontology.org/LandslideDangerLevel/VeryHighLandslideDanger> a :LandslideDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040104> ;
     rdfs:label "Very high landslide danger"@en,
                "Sehr hohe Rutschungsgefahr"@de,
                "Pericolo di frane molto elevato"@it .
 
-:HighLandslideDanger a :LandslideDangerLevel ;
+<http://hazard-ontology.org/LandslideDangerLevel/HighLandslideDanger> a :LandslideDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040103> ;
     rdfs:label "High landslide danger"@en,
                "Hohe Rutschungsgefahr"@de,
                "Pericolo di frane elevato"@it .
 
-:MediumLandslideDanger a :LandslideDangerLevel ;
+<http://hazard-ontology.org/LandslideDangerLevel/MediumLandslideDanger> a :LandslideDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040102> ;
     rdfs:label "Medium landslide danger"@en,
                "Mittlere Rutschungsgefahr"@de,
                "Pericolo di frane medio"@it .
 
-:ExaminedNotInDangerLandslide a :LandslideDangerLevel ;
+<http://hazard-ontology.org/LandslideDangerLevel/ExaminedNotInDangerLandslide> a :LandslideDangerLevel ;
+    owl:sameAs <http://hazard-ontology.org/DangerLevel/1040101> ;
     rdfs:label "Examined and not in danger of landslides"@en,
                "Untersucht und keine Rutschungsgefahr"@de,
                "Esaminato e non soggetto a pericolo di frane"@it .

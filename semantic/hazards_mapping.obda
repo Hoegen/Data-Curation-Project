@@ -1,0 +1,108 @@
+[PrefixDeclaration]
+:      http://hazard-ontology.org/
+geo:   http://www.opengis.net/ont/geosparql#
+xsd:   http://www.w3.org/2001/XMLSchema#
+rdfs: http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+# Municipality class and properties
+mappingId: Municipality
+target:    :Municipality/{ISTAT_CODE} a :Municipality ;
+             :hasIstatCode {ISTAT_CODE} ;
+             :hasBelfioreCode {BELFIORE_CODE} ;
+             :hasZipCode {ZIP_CODE} ;
+             rdfs:label "{MAP_LABEL}"@it ;
+             rdfs:label "{MAP_LABEL}"@de ;
+             :name "{NAME_IT}"@it ;
+             :name "{NAME_DE}"@de ;
+             :name "{NAME_LD}"@ld .
+             :hasArea {AREA} ;
+             :isPartOfGeographicUnit :ProvincialDistrict/{DISTR_CODE} ;
+             :isPartOfGeographicUnit :HealthDistrict/{HEALTH_DISTRICT} ;
+             :hasGeometry :Geometry/Municipality/{ISTAT_CODE} .
+source:    SELECT ISTAT_CODE, BELFIORE_CODE, ZIP_CODE, NAME_IT, NAME_DE, NAME_LD, MAP_LABEL, AREA, DISTR_CODE, HEALTH_DISTRICT FROM Municipalities
+
+# Districts as ProvincialDistrict
+mappingId: ProvincialDistrict
+target:    :ProvincialDistrict/{CODE} a :ProvincialDistrict ;
+             rdfs:label "{LABEL_IT}"@it ;
+             rdfs:label "{LABEL_IT}"@de ;
+             :name "{LABEL_IT}"@it ;
+             :name "{LABEL_DE}"@de .
+source:    SELECT DISTINCT CODE, LABEL_IT, LABEL_DE FROM Districts
+
+# HealthDistricts
+mappingId: HealthDistrict
+target:    :HealthDistrict/{HEALTH_DISTRICT} a :HealthDistrict ;
+             :isPartOfGeographicUnit :HealthRegion/{HEALTH_REGION} .
+source:    SELECT DISTINCT HEALTH_DISTRICT, HEALTH_REGION FROM Health_districts
+
+# HealthRegion
+mappingId: HealthRegion
+target:    :HealthRegion/{HEALTH_REGION} a :HealthRegion .
+source:    SELECT DISTINCT HEALTH_REGION FROM Health_districts
+
+# HazardZone class and properties
+mappingId: HazardZone
+target:    :HazardZone/{FID} a :HazardZone ;
+             :hasHazardProcess :HazardProcess/{CODE_PROCESS} ;
+             :hasStudyLevel :StudyLevel/{CODE_STUDY} ;
+             :hasDangerLevel :DangerLevel/{CODE_DANGER} ;
+             :hasGeometry :Geometry/HazardZone/{FID} ;
+             :isLocatedInMunicipality :Municipality/{ISTAT_CODE} .
+source:    SELECT FID, CODE_PROCESS, CODE_STUDY, CODE_DANGER, ISTAT_CODE FROM Hazard_zones
+
+# Geometry for HazardZone
+mappingId: HazardZoneGeometry
+target:    :Geometry/HazardZone/{FID} a geo:Geometry ;
+             geo:asWKT "{SHAPE}"^^geo:wktLiteral .
+source:    SELECT FID, ST_AsText(SHAPE) AS SHAPE FROM Hazard_zones
+
+# AvalancheZone subclass
+mappingId: AvalancheZone
+target:    :HazardZone/{FID} a :AvalancheZone .
+source:    SELECT FID FROM Hazard_zones WHERE CODE_PROCESS IN ('1040304', '1040303', '1040302', '1040301')
+
+# LandslideZone subclass
+mappingId: LandslideZone
+target:    :HazardZone/{FID} a :LandslideZone .
+source:    SELECT FID FROM Hazard_zones WHERE CODE_PROCESS IN ('1040104', '1040103', '1040102', '1040101')
+
+# RoadSegment class and properties
+mappingId: RoadSegment
+target:    :RoadSegment/{FID} a :RoadSegment ;
+             :isLocatedInMunicipality :Municipality/{ISTAT_CODE} ;
+             :comesFromPoint :RoadSegmentConnectionPoint/{from} ;
+             :goesToPoint :RoadSegmentConnectionPoint/{to} ;
+             :belongsToRef :RouteReference/{ref} ;
+             :hasGeometry :RoadSegmentGeometry/{FID} .
+source:    SELECT FID, from, to, ref, ISTAT_CODE FROM Road_segments
+
+# Osmids
+mappingId: Osmid
+target:    :RoadSegment/{FID} :hasOsmId {osmid} .
+source:    SELECT FID, o.osmid FROM Osmids
+
+# Geometry for RoadSegment
+mappingId: RoadSegmentGeometry
+target:    :RoadSegmentGeometry/{FID} a geo:Geometry ;
+             geo:asWKT "{geom}"^^geo:wktLiteral .
+source:    SELECT FID, ST_AsText(geom) AS geom FROM Road_segments
+
+# Bridge subclass
+mappingId: Bridge
+target:    :RoadSegment/{FID} a :Bridge .
+source:    SELECT FID FROM Road_segments WHERE bridge = TRUE
+
+# Tunnel subclass
+mappingId: Tunnel
+target:    :RoadSegment/{FID} a :Tunnel .
+source:    SELECT FID FROM Road_segments WHERE tunnel = TRUE
+
+# Road-Hazard intersection (object property)
+mappingId: RoadHazardIntersection
+target:    :RoadSegment/{ID_ROAD} :intersectsHazardZone :HazardZone/{ID_HAZARD} .
+source:    SELECT ID_ROAD, ID_HAZARD FROM Road_Hazard_Zone_intersection
+
+]]
