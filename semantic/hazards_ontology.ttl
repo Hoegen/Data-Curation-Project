@@ -241,6 +241,11 @@
     rdfs:range xsd:decimal ;
     rdfs:label "area in square meters"@en .
 
+:hasLength a owl:DatatypeProperty ;
+    rdfs:domain :RoadSegment ;
+    rdfs:range xsd:double ;
+    rdfs:label "length in meters"@en .
+
 # GeoSPARQL geometry
 geo:asWKT rdfs:label "as WKT"@en .
 

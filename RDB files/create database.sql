@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS Road_segments (
     bridge BOOLEAN DEFAULT FALSE,
     tunnel BOOLEAN DEFAULT FALSE,
     geom MULTILINESTRING NOT NULL,
+    length_meters DOUBLE,
     SPATIAL INDEX(geom),
     CONSTRAINT check_road_srid CHECK (ST_SRID(geom) = 32632)
 );

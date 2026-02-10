@@ -6,8 +6,12 @@ rdfs:	http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	Municipality
-target		:Municipality/{ISTAT_CODE} a :Municipality ; :hasIstatCode "{ISTAT_CODE}"^^xsd:string ; :hasBelfioreCode "{BELFIORE_CODE}"^^xsd:string ; :hasZipCode "{ZIP_CODE}"^^xsd:string ; rdfs:label "{MAP_LABEL}"@it ; rdfs:label "{MAP_LABEL}"@de ; :name "{NAME_IT}"@it ; :name "{NAME_DE}"@de ; :name "{NAME_LD}"@ld ; :hasArea {AREA}^^xsd:decimal ; :isPartOfGeographicUnit :ProvincialDistrict/{DISTR_CODE} ; :isPartOfGeographicUnit :HealthDistrict/{HEALTH_DISTRICT} ; :hasGeometry :Geometry/Municipality/{ISTAT_CODE} .
+target		:Municipality/{ISTAT_CODE} a :Municipality ; :hasIstatCode "{ISTAT_CODE}"^^xsd:string ; :hasBelfioreCode "{BELFIORE_CODE}"^^xsd:string ; :hasZipCode "{ZIP_CODE}"^^xsd:string ; rdfs:label "{MAP_LABEL}"@it ; rdfs:label "{MAP_LABEL}"@de ; :name "{NAME_IT}"@it ; :name "{NAME_DE}"@de ; :hasArea {AREA}^^xsd:decimal ; :isPartOfGeographicUnit :ProvincialDistrict/{DISTR_CODE} ; :isPartOfGeographicUnit :HealthDistrict/{HEALTH_DISTRICT} ; :hasGeometry :Geometry/Municipality/{ISTAT_CODE} .
 source		SELECT ISTAT_CODE, BELFIORE_CODE, ZIP_CODE, NAME_IT, NAME_DE, NAME_LD, MAP_LABEL, AREA, DISTR_CODE, HEALTH_DISTRICT FROM municipalities
+
+mappingId	Municipality_Ladin
+target		:Municipality/{ISTAT_CODE} :name "{NAME_LD}"@ld .
+source		SELECT ISTAT_CODE, NAME_LD FROM municipalities WHERE NAME_LD_IS NOT NULL AND NAME_LD <> ''
 
 mappingId	ProvincialDistrict
 target		:ProvincialDistrict/{CODE} a :ProvincialDistrict ; rdfs:label "{LABEL_IT}"@it ; rdfs:label "{LABEL_DE}"@de ; :name "{LABEL_IT}"@it ; :name "{LABEL_DE}"@de .
@@ -31,15 +35,19 @@ source		SELECT FID, ST_AsText(SHAPE) AS SHAPE FROM Hazard_zones
 
 mappingId	AvalancheZone
 target		:HazardZone/{FID} a :AvalancheZone .
-source		SELECT FID FROM hazard_zones WHERE CODE_PROCESS IN ('1040304', '1040303', '1040302', '1040301')
+source		SELECT FID FROM hazard_zones WHERE CODE_DANGER IN ('1040304', '1040303', '1040302', '1040301')
 
 mappingId	LandslideZone
 target		:HazardZone/{FID} a :LandslideZone .
-source		SELECT FID FROM hazard_zones WHERE CODE_PROCESS IN ('1040104', '1040103', '1040102', '1040101')
+source		SELECT FID FROM hazard_zones WHERE CODE_DANGER IN ('1040104', '1040103', '1040102', '1040101')
 
 mappingId	RoadSegment
 target		:RoadSegment/{FID} a :RoadSegment ; :isLocatedInMunicipality :Municipality/{ISTAT_CODE} ; :comesFromPoint :RoadSegmentConnectionPoint/{from_node} ; :goesToPoint :RoadSegmentConnectionPoint/{to_node} ; :belongsToRef :RouteReference/{ref} ; :hasGeometry :RoadSegmentGeometry/{FID} .
 source		SELECT FID, from_node, to_node, ref, ISTAT_CODE FROM road_segments
+
+mappingId  RoadSegmentLength
+target     :RoadSegment/{FID} :hasLength {length_meters}^^xsd:double .
+source     SELECT FID, length_meters FROM road_segments
 
 mappingId	Osmid
 target		:RoadSegment/{FID} :hasOsmId "{osmid}"^^xsd:string .
